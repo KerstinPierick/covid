@@ -98,7 +98,7 @@ data_sw <- tibble(
 ) %>%
   mutate(count_7dago = lag(count, 7),
          newcases_7d = count-count_7dago,
-         nc_7d_perht = newcases_7d*(100000/pop_w))
+         nc_7d_perht = newcases_7d*(100000/pop_sw))
 
 data_sw
 
@@ -118,18 +118,88 @@ data_sw %>%
 ggsave("plot_sw.png", width = 10, height = 5)  
 
 
+# Stadt Bielefeld ----------------------------------------------------------------
+
+
+# get numbers of total infections for Landkreis Würzburg 
+count_b <- data$kreise$items$historicalStats$count[[98]]
+
+pop_b <- 333786
+# unite data in a tibble, reduced to shortest available vector length
+data_b <- tibble(
+  day = day[1:min(lengths)],
+  count = count_b[1:min(lengths)]
+) %>%
+  mutate(count_7dago = lag(count, 7),
+         newcases_7d = count-count_7dago,
+         nc_7d_perht = newcases_7d*(100000/pop_b))
+
+data_b
+
+
+# visualize
+data_b %>%
+  filter(day > ymd("2020-03-31")) %>%
+  ggplot(aes(x = day, y = nc_7d_perht)) +
+  geom_line(col = "red") +
+  geom_point(aes(x,y), data = tibble(x = seq(ymd("2020-04-01"), date_end, by = "days"), y = 18), 
+             shape = "\U0001F438", size = 4, col = "darkgreen") +
+  theme_bw() +
+  labs(x = NULL, y = NULL, 
+       title = "Neuinfektionen mit Covid-19 in 7 Tagen pro 100.000 Einwohner in Bielefeld")
+
+# save
+ggsave("plot_b.png", width = 10, height = 5)  
+
+
+# Stadt Kassel ----------------------------------------------------------------
+
+
+# get numbers of total infections for Landkreis Würzburg 
+count_k <- data$kreise$items$historicalStats$count[[136]]
+
+pop_k <- 201585
+# unite data in a tibble, reduced to shortest available vector length
+data_k <- tibble(
+  day = day[1:min(lengths)],
+  count = count_k[1:min(lengths)]
+) %>%
+  mutate(count_7dago = lag(count, 7),
+         newcases_7d = count-count_7dago,
+         nc_7d_perht = newcases_7d*(100000/pop_k))
+
+data_k
+
+
+# visualize
+data_k %>%
+  filter(day > ymd("2020-03-31")) %>%
+  ggplot(aes(x = day, y = nc_7d_perht)) +
+  geom_line(col = "red") +
+  geom_point(aes(x,y), data = tibble(x = seq(ymd("2020-04-01"), date_end, by = "days"), y = 18), 
+             shape = "\U0001F438", size = 4, col = "darkgreen") +
+  theme_bw() +
+  labs(x = NULL, y = NULL, 
+       title = "Neuinfektionen mit Covid-19 in 7 Tagen pro 100.000 Einwohner in Kassel")
+
+# save
+ggsave("plot_k.png", width = 10, height = 5)  
+
+
 # all ---------------------------------------------------------------------
 
 data_w$county <- "LK Würzburg"
 data_g$county <- "LK Göttingen"
 data_sw$county <- "Stadt Würzburg"
+data_b$county <- "Stadt Bielefeld"
+data_k$county <- "Stadt Kassel"
 
-bind_rows(data_w, data_g, data_sw) %>%
-  filter(day > ymd("2020-03-31")) %>%
+bind_rows(data_w, data_g, data_sw, data_b, data_k) %>%
+  filter(day > ymd("2020-04-14")) %>%
   ggplot(aes(x = day, y = nc_7d_perht, col = county)) +
   geom_line() +
-  geom_point(aes(x,y), data = tibble(x = seq(ymd("2020-04-01"), date_end, by = "days"), y = 18), 
-             shape = "\U0001F438", size = 4, col = "darkgreen") +
+ # geom_point(aes(x,y), data = tibble(x = seq(ymd("2020-04-01"), date_end, by = "days"), y = 18), 
+  #           shape = "\U0001F438", size = 4, col = "darkgreen") +
   theme_bw() +
   labs(x = NULL, y = NULL, col = NULL,
        title = "Neuinfektionen mit Covid-19 in 7 Tagen pro 100.000 Einwohner")
